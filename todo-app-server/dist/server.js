@@ -1,2 +1,28 @@
-(()=>{"use strict";var e={388:(e,t)=>{Object.defineProperty(t,"__esModule",{value:!0}),t.default=function(e,t,u){t.status(501).json({message:"Not Implemented."})}},508:function(e,t,u){var o=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(t,"__esModule",{value:!0});const r=o(u(860)),s=o(u(388)),l=r.default.Router();l.get("/",s.default),l.post("/",s.default),l.delete("/",s.default),l.put("/",s.default),t.default=l},699:function(e,t,u){var o=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(t,"__esModule",{value:!0});const r=o(u(860)),s=o(u(852)),l=o(u(508)),n=(0,r.default)();n.use("/",l.default),n.listen(8e3,(()=>{console.log("Listen on port 8000."),console.log((0,s.default)(n))})),t.default=n},860:e=>{e.exports=require("express")},852:e=>{e.exports=require("express-list-endpoints")}},t={};!function u(o){var r=t[o];if(void 0!==r)return r.exports;var s=t[o]={exports:{}};return e[o].call(s.exports,s,s.exports,u),s.exports}(699)})();
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const mysql = require('mysql');
+const express = require('express');
+const expressListEndpoints = require('express-list-endpoints');
+const app = express();
+app.use(express.json());
+const router = require('./routes/index');
+const config = require('../config/mysql.config');
+const con = mysql.createConnection({
+    host: config.HOST,
+    port: config.PORT,
+    user: config.USERNAME,
+    password: config.PASSWORD,
+    database: config.DATABASE
+});
+con.connect((err) => {
+    if (err)
+        throw err;
+    console.log('Connected');
+});
+app.use('/', router);
+app.listen(8000, () => {
+    console.log('Listen on port 8000.');
+    console.log(expressListEndpoints(app));
+});
+exports.default = app;
 //# sourceMappingURL=server.js.map
