@@ -1,15 +1,11 @@
 import React from 'react'
-import TodoList from '../../compornents/templates/todo/TodoList'
+import todoList from '../../compornents/templates/todo/TodoList'
 
-export default TodoList
+export default todoList
 
-// export const getStaticProps = () => {
-//     const propTodos = [
-//         {id: 1, title:'title1', text:'text1'},
-//         {id: 2, title:'title2', text:'text2'},
-//         {id: 3, title:'title3', text:'text3'},
-//         {id: 4, title:'title4', text:'text4'}
-//       ]
+export const getStaticProps = async () => {
+	const res = await fetch('http://localhost:8000/todo')
+	const todos = await res.json()
 
-//     return { props: {propTodos}}
-// }
+	return { props: {todos:todos}}
+}
