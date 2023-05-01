@@ -8,7 +8,7 @@ export const Home: NextPage = () => {
     <HeaderWithBody>
        <div className='flex justify-center p-10'>
         <Link href='signin'>
-          <p className='text-7xl'>Login App</p>
+          <p className='text-7xl'>Todo App</p>
         </Link>
       </div>
     </HeaderWithBody>

@@ -7,7 +7,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { User } from '@/types/types'
 import { useRouter } from 'next/router'
 import axios from 'axios'
-import { InputWithError } from '@/components/InputWithError'
+import { InputWithError } from '@/components/parts/InputWithError'
 import { HeaderWithBody } from '../components/layouts/HeaderWithBody';
 
 const signUpSchema = yup.object().shape({

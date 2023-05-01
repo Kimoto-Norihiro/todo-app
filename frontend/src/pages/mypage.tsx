@@ -1,72 +1,56 @@
 import { GetServerSideProps, NextPage } from 'next'
 import React from 'react'
 import { parseCookies } from 'nookies'
-import { User } from '@/types/types'
+import { User } from '../types/types'
 import { useRouter } from 'next/router'
 import axios from 'axios'
-import { HeaderWithBody } from '@/components/layouts/HeaderWithBody'
+import { HeaderWithBody } from '../components/layouts/HeaderWithBody'
+import TodoCard from '@/components/parts/TodoCard'
 
-type Props = {
-  user: User
-}
-
-const MyPage: NextPage<Props> = ({user}: Props) => {
+const MyPage: NextPage = () => {
   return (
     <HeaderWithBody>
-      <div className='flex flex-col bg-white justify-center p-10 align-center'>
-        <div className='flex justify-center text-3xl'>
-          <h1>My Page</h1>
+      <div className='flex flex-col bg-white justify-center align-center'>
+        <div className='flex justify-center p-4'>
+          <p className='text-5xl'>My Page</p>
         </div>
-        <div className='flex justify-center'>
-          <div className='w-96 mt-5'>
-            <div className='flex justify-between align-middle border-b-2 border-gray-400 h-8'>
-              <label className='text-2xl'>id</label>
-              <div className='w-48'>
-                <p className='text-2xl'>{user.id}</p>
+        <div className='flex'>
+          <div className='w-1/4 p-4'>
+            <p className='text-3xl mb-2'>Profile</p>
+            <div className='border-2 rounded-lg border-gray-500 p-6'>
+              <div className='flex justify-between'>
+                <label className='text-lg'>id</label>
+                <p className='text-lg'>1</p>
+              </div>
+              <div className='flex justify-between'>
+                <label className='text-lg'>name</label>
+                <p className='text-lg'>test</p>
+              </div>
+              <div  className='flex justify-between'>
+                <label className='text-lg'>email</label>
+                <p className='text-lg'>test@example.com</p>
               </div>
             </div>
-            <div className='flex justify-between border-b-2 border-gray-400'>
-              <label className='text-2xl'>name</label>
-              <div className='w-48'>
-                <p className='text-2xl'>{user.name}</p>
-              </div>
+            <p className='text-3xl my-2'>Settings</p>
+            <div className='border-2 rounded-lg border-gray-500 p-6'>
+
             </div>
-            <div  className='flex justify-between border-b-2 border-gray-400'>
-              <label className='text-2xl'>email</label>
-              <div className='w-48'>
-                <p className='text-2xl'>{user.email}</p>
-              </div>
+          </div>
+          <div className='w-3/4 p-4'>
+            <p className='text-3xl mb-2'>Todo List</p>
+            <div className='border-2 rounded-lg border-gray-500 p-6'>
+              {
+                [1,2,3,4,5,6,7,8,9,10].map((i) => (
+                  <TodoCard key={i}/>
+                ))
+              }
+              <p className='text-blue-500 hover:text-blue-700'>+ add todo</p>
             </div>
           </div>
         </div>
       </div>
     </HeaderWithBody>
   )
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { token } = parseCookies(context)
-
-  const response = await axios.get('http://localhost:8000/mypage', {
-    headers: {'Authorization': `Bearer: ${token}`}
-  })
-  const { result, message, user } = response.data
-  
-  if (!result) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: '/signin'
-      }
-    }
-  }
-  return {
-    props: {
-      result,
-      message,
-      user
-    }
-  }
 }
 
 export default MyPage

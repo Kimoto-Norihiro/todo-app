@@ -1,6 +1,6 @@
 import React from 'react'
 import { FieldErrors, FieldValues, Path } from 'react-hook-form'
-import { SignUpFormValues } from '@/pages/signup'
+import { SignUpFormValues } from '../../pages/signup'
 import { UseFormRegister } from 'react-hook-form'
 
 type Props<T extends FieldValues> = {

@@ -4,10 +4,10 @@ import type { NextPage } from 'next'
 import { useForm } from 'react-hook-form'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { User } from '@/types/types'
+import { User } from '../types/types'
 import { useRouter } from 'next/router'
 import axios from 'axios'
-import { InputWithError } from '../components/InputWithError';
+import { InputWithError } from '../components/parts/InputWithError';
 import { HeaderWithBody } from '../components/layouts/HeaderWithBody';
 
 const signInSchema = yup.object().shape({
@@ -59,7 +59,7 @@ const SignIn: NextPage = () => {
 
   return (
     <HeaderWithBody>
-      <div className='flex flex-col bg-white justify-center p-10 align-center'>
+      <div className='flex flex-col bg-white justify-center align-center p-10'>
         <div className='flex justify-center text-3xl'>
           <h1>Sign In</h1>
         </div>
