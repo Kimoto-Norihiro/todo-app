@@ -28,8 +28,8 @@ export const ModalProvider = ({ children }: Props) => {
           <div onClick={closeModal}>
             <div className='h-screen w-screen bg-black bg-opacity-50 flex justify-center items-center'>
               <div
-                onClick={() => {
-                  // do nothing
+                onClick={(e) => {
+                  e.stopPropagation()
                 }}
               >
                 {modal}
