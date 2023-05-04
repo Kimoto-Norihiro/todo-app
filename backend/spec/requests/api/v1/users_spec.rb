@@ -7,14 +7,14 @@ RSpec.describe "Users", type: :request do
 
   describe "GET /show" do
     it "returns http success" do
-      get api_v1_user_path(user.id)
+      get api_v1_users_path
       expect(response).to have_http_status(:success)
     end
   end
 
   describe "POST /create" do
     it "returns http success" do
-      post api_v1_users_path(), params: { user: attributes_for(:user) }
+      post api_v1_users_path, params: { user: attributes_for(:user) }
       expect(response).to have_http_status(:success)
     end
   end
@@ -23,14 +23,14 @@ RSpec.describe "Users", type: :request do
     it "returns http success" do
       user = create(:user)
 
-      put api_v1_user_path(user.id), params: { user: { name: 'change name' }}
+      put api_v1_users_path, params: { name: 'change name', email: 'change email' }
       expect(response).to have_http_status(:success)
     end
   end
 
-  describe "PATCH /delete" do
+  describe "DELETE /delete" do
     it "returns http success" do
-      delete api_v1_user_path(user.id)
+      delete api_v1_users_path
       expect(response).to have_http_status(:success)
     end
   end
