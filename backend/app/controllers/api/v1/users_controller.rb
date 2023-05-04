@@ -2,6 +2,11 @@ class Api::V1::UsersController < ApplicationController
   include Authenticatable
   before_action :authenticate_with_token!, except: [:create]
 
+  def show
+    data = User.includes(todos: :tags).find(current_user.id).as_json(include: {todos: {include: :tags}})
+    render json: data, status: :ok
+  end
+
   def create
     user = User.new(user_params)
     if user.save
@@ -11,21 +16,20 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
-  def show
-    data = User.includes(:todos, :tags).find(current_user.id)
-    render json: data, status: :ok
-  end
-
+  # TODO: update user validation
   def update
-    if current_user.update(user_params)
-      render json: current_user
-    else
-      render json: current_user.errors
-    end
+    current_user.update_attribute(:email, params[:email])
+    current_user.update_attribute(:name, params[:name])
+    
+    render json: current_user, status: :ok
   end
 
   def destroy
-    current_user.destroy
+    if current_user.destroy
+      render status: :ok
+    else
+      render json: current_user.errors
+    end
   end
 
   private

@@ -5,6 +5,13 @@ RSpec.describe "Todos", type: :request do
   let (:token) { TokenService.issue_token(user.id) }
   before { cookies[:token] = token }
 
+  describe "GET /index" do
+    it "returns http success" do
+      get api_v1_todos_path()
+      expect(response).to have_http_status(:success)
+    end
+  end
+
   describe "POST /create" do
     it "returns http success" do
       post api_v1_todos_path(), params: { todo: attributes_for(:todo) }

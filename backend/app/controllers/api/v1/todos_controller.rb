@@ -3,6 +3,11 @@ class Api::V1::TodosController < ApplicationController
   before_action :authenticate_with_token!
   before_action :set_todo, only: [:update, :destroy]
 
+  def index
+    todo = Todo.where(user_id: current_user.id).as_json(include: [:tags])
+    render json: todo, status: :ok
+  end
+
   def create
     todo = current_user.todos.new(todo_params)
     if todo.save
@@ -26,7 +31,7 @@ class Api::V1::TodosController < ApplicationController
 
   private
   def todo_params
-    params.require(:todo).permit(:title, :description, :user_id, :tag_id)
+    params.require(:todo).permit(:title, :body)
   end
 
   def set_todo

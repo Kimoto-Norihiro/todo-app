@@ -18,7 +18,6 @@ class Api::V1::TodoTagsController < ApplicationController
 
   private
   def todo_tag_params
-    puts params
     params.require(:todo_tag).permit(:todo_id, :tag_id)
   end
 

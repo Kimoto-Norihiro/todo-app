@@ -5,6 +5,13 @@ RSpec.describe "Tags", type: :request do
   let (:token) { TokenService.issue_token(user.id) }
   before { cookies[:token] = token }
 
+  describe "GET /index" do
+    it "returns http success" do
+      get api_v1_tags_path()
+      expect(response).to have_http_status(:success)
+    end
+  end
+
   describe "POST /create" do
     it "returns http success" do
       post api_v1_tags_path(), params: { tag: attributes_for(:tag) }
@@ -22,7 +29,7 @@ RSpec.describe "Tags", type: :request do
     end
   end
 
-  describe "PATCH /delete" do
+  describe "DELETE /delete" do
     it "returns http success" do
       user = create(:user)
       tag = create(:tag, user: user)

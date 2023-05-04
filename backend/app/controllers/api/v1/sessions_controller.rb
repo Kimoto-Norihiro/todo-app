@@ -4,4 +4,9 @@ class Api::V1::SessionsController < ApplicationController
     cookies[:token] = token
     render status: :created
   end
+
+  def destroy
+    cookies.delete(:token)
+    render status: :ok
+  end
 end
