@@ -4,7 +4,8 @@ module Authenticatable
   end
 
   def current_user
-    AuthenticationService.authenticate_user_with_token!(cookies[:token])
+    token = request.headers['Authorization'].split(' ').last
+    AuthenticationService.authenticate_user_with_token!(token)
   rescue AuthenticationError
     nil
   end

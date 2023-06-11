@@ -18,7 +18,11 @@ class Api::V1::TodosController < ApplicationController
   end
 
   def destroy 
-    @todo.destroy
+    if @todo.destroy
+      render status: :ok
+    else
+      render json: @todo.errors
+    end
   end
 
   def update
