@@ -9,6 +9,7 @@ import { useRouter } from 'next/router'
 import axios from 'axios'
 import { InputWithError } from '../components/parts/InputWithError';
 import { HeaderWithBody } from '../components/layouts/HeaderWithBody';
+import { useAuth } from '@/contexts/auth-context'
 
 const signInSchema = yup.object().shape({
   email: yup.string().email('invalid email').required('required input'),
@@ -17,9 +18,9 @@ const signInSchema = yup.object().shape({
 
 type signInFormValues = Omit<User, 'name'>
 
-
 const SignIn: NextPage = () => {
   const router = useRouter()
+  const { login } = useAuth()
   const [err, setErr] = useState('')
 
   const { register, handleSubmit, formState: { errors } } = useForm<signInFormValues>({
@@ -28,10 +29,7 @@ const SignIn: NextPage = () => {
 
   const signIn = async (user: signInFormValues) => {
     try {
-      const response = await axios.post('http://localhost:8000/signin', user, { 
-          withCredentials: true 
-        }
-      )
+      const response = await axios.post('http://localhost:3000/api/v1/sign_in', user, { withCredentials: true })
       return response.data
     } catch (err) {
       if (err instanceof Error) {
@@ -45,13 +43,9 @@ const SignIn: NextPage = () => {
 
   const submit = () => {
     handleSubmit(async (data) => {
-      const {message, token, result} = await signIn(data)
-      console.log(result)
-      if (result) {
-        router.push('/mypage')
-      } else {
-        setErr(message)
-      }
+      const { token } = await signIn(data)
+      await login(token)
+      await router.push('/mypage')
     }, () => {
       console.log('error')
     })()

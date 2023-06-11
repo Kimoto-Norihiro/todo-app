@@ -26,18 +26,14 @@ const SignUp: NextPage = () => {
   })
 
   const signUp = async (user: SignUpFormValues) => {
-    const response = await axios.post('http://localhost:8000/signup', user)
+    const response = await axios.post('http://localhost:3000/api/v1/users', {user: user}, { withCredentials: true })
     return response.data
   }
 
   const submit = () => {
     handleSubmit(async (data) => {
-      const { result, message } = await signUp(data)
-      if (result) {
-        router.push('/signin')
-      } else {
-        setErr(message)
-      }
+      const res = await signUp(data)
+      router.push('/signin')
     }, () => {
       console.log('error')
     })()
