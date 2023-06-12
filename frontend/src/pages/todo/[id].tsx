@@ -1,29 +1,78 @@
 import { NextPage, GetStaticPaths, GetStaticProps } from 'next'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { HeaderWithBody } from '../../components/layouts/HeaderWithBody'
 import { InputWithError } from '../../components/parts/InputWithError'
 import { useForm } from 'react-hook-form'
 import { Todo } from '../../types/types'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup';
+import axios from 'axios'
+import { useAuth } from '@/contexts/auth-context'
+import { useRouter } from 'next/router'
+
+type TodoUpdateRequest = Pick<Todo, 'title' | 'body'>
 
 type Props = {
   id: string
 }
 
 const todoSchema = yup.object().shape({
-  title: yup.string().email('invalid email').required('required input'),
+  title: yup.string().required('required input'),
 })
 
 const EditTodo: NextPage<Props> = ({ id }) => {
   const [err, setErr] = useState('')
-  const { register, handleSubmit, formState: { errors } } = useForm<Todo>({
+  const router = useRouter()
+  const { authToken } = useAuth()
+  const [todo, setTodo] = useState<TodoUpdateRequest>()
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm<TodoUpdateRequest>({
     resolver: yupResolver(todoSchema),
-    defaultValues: {
-      title: `title ${id}`,
-      body: `body ${id}`
-    }
   });
+
+  const getTodo = async () => {
+    const {data} = await axios.get(`http://localhost:8000/api/v1/todos/${id}`,
+      {
+        withCredentials: true, 
+        headers: {'Authorization': `Bearer: ${authToken}`},
+      }
+    )
+    setTodo(data)
+  }
+
+  const updateTodo = async (todo: TodoUpdateRequest) => {
+    const response = await axios.put(`http://localhost:8000/api/v1/todos/${id}`, 
+      { todo: todo }, 
+      {
+        withCredentials: true, 
+        headers: {'Authorization': `Bearer: ${authToken}`},
+      }
+    )
+  }
+
+  const onSubmit = async () => {
+    handleSubmit(async (data) => {
+      const response = await updateTodo({
+        title: data.title,
+        body: data.body,
+      })
+      console.log(response)
+      router.back()
+    }, (err) => {
+      console.log(err)
+      console.log('error')
+    })()
+  }
+
+  useEffect(() => {
+    getTodo()
+  },[authToken])
+
+  useEffect(() => {
+    if (todo) {
+      setValue('title', todo?.title || '')
+      setValue('body', todo?.body || '')
+    }
+  },[todo])
 
   return (
     <HeaderWithBody>
@@ -36,6 +85,7 @@ const EditTodo: NextPage<Props> = ({ id }) => {
             className='w-96 p-3' 
             onSubmit={(e) => {
             e.preventDefault()
+            onSubmit()
           }}>
             <InputWithError 
               name='title'
@@ -62,31 +112,24 @@ const EditTodo: NextPage<Props> = ({ id }) => {
   )
 }
 
-export const getStaticPaths: GetStaticPaths<Props> = async () => {
-  // const res = await fetch('https://example.com/api/users');
-  // const users = await res.json();
+type PathParams = {
+  id: string
+}
 
-  // パスを生成
-  // const paths = users.map((user: User) => ({
-  //   params: { id: user.id.toString() },
-  // }));
-
-  const paths = [1,2,3,4,5].map((i) => ({
-    params: { id: i.toString() }
-  }))
-
+export const getStaticPaths: GetStaticPaths<PathParams> = async () => {
   return {
-    paths,
-    fallback: true
+    paths: [],
+    fallback: true,
   };
 };
 
-export const getStaticProps: GetStaticProps<Props> = async ({params}) => {
+export const getStaticProps: GetStaticProps = async ({params}) => {
+  const { id } = params as PathParams
   return {
     props: {
-      id: params?.id?.toString() || '1',
+      id,
     },
-  };
-};
+  }
+}
 
 export default EditTodo

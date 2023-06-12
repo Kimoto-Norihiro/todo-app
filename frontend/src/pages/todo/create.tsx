@@ -1,21 +1,60 @@
 import { NextPage } from 'next'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { HeaderWithBody } from '../../components/layouts/HeaderWithBody'
 import { InputWithError } from '../../components/parts/InputWithError'
 import { useForm } from 'react-hook-form'
 import { Todo } from '../../types/types'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { useAuth } from '@/contexts/auth-context'
+import { useRouter } from 'next/router'
+import axios from 'axios'
 import * as yup from 'yup';
 
+type TodoCreateRequest = Pick<Todo, 'title' | 'body'>
+
 const todoSchema = yup.object().shape({
-  title: yup.string().email('invalid email').required('required input'),
+  title: yup.string().required('required input'),
 })
 
 const CreateTodo: NextPage = () => {
   const [err, setErr] = useState('')
-  const { register, handleSubmit, formState: { errors } } = useForm<Todo>({
+  const { authToken } = useAuth()
+  const router = useRouter()
+
+  const { register, handleSubmit, formState: { errors } } = useForm<TodoCreateRequest>({
     resolver: yupResolver(todoSchema),
   });
+
+  const createTodo = async (todo: TodoCreateRequest) => {
+    const response = await axios.post(`http://localhost:8000/api/v1/todos`, { todo: todo }, 
+    {
+      withCredentials: true, 
+      headers: {'Authorization': `Bearer: ${authToken}`} 
+    })
+    return response.data
+  }
+
+  useEffect(() => {
+    console.log('authToken', localStorage.getItem('authToken'))
+  }, [])
+
+  const onSubmit = async () => {
+    handleSubmit(async (data) => {
+      const response = await createTodo({
+        title: data.title,
+        body: data.body,
+      })
+      console.log(response)
+      router.back()
+    }, (err) => {
+      console.log(err)
+      console.log('error')
+    })()
+  }
+
+  // useEffect(() => {
+  //   if (!authToken) router.push('/login')
+  // }, [authToken])
 
   return (
     <HeaderWithBody>
@@ -27,8 +66,10 @@ const CreateTodo: NextPage = () => {
           <form
             className='w-96 p-3' 
             onSubmit={(e) => {
-            e.preventDefault()
-          }}>
+              e.preventDefault()
+              onSubmit()
+            }}
+          >
             <InputWithError 
               name='title'
               register={register}

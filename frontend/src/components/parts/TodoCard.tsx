@@ -1,7 +1,10 @@
-import React, { useState } from "react";
-import { useCommonModal } from "../../hooks/modal-context";
+import React, { useEffect, useState } from "react";
+import { useCommonModal } from "../../contexts/modal-context";
 import { Todo } from "../../types/types";
 import { useRouter } from 'next/router';
+import { DeleteModal } from "./DeleteModal";
+import { authAxios } from "@/types/api/axios";
+import { useAuth } from '../../contexts/auth-context';
 
 type Props = {
   todo: Todo
@@ -11,6 +14,11 @@ const TodoCard = ({todo}: Props) => {
   const { showModal } = useCommonModal();
   const router = useRouter()
   const [done, setDone] = useState(false)
+  const { authToken } = useAuth()
+
+  const deleteTodo = async () => {
+    await authAxios.delete(`/todos/${todo.id}`, { headers: {'Authorization': `Bearer: ${authToken}`} })
+  }
 
   return (
     <div className="flex rounded-lg p-4 py-2 items-center justify-between border-2 border-gray-500 m-1">
@@ -23,8 +31,8 @@ const TodoCard = ({todo}: Props) => {
       </div>
       <div className="flex">
         {
-          [1,2,3].map((i) => (
-            <div key={i} className='px-1 border-2 border-gray-500 rounded-lg color-gray-500 mr-1'>{`tag${i}`}</div>
+          todo.tags.map((tag,index) => (
+            <div key={index} className='px-1 border-2 border-gray-500 rounded-lg color-gray-500 mr-1'>{tag.name}</div>
           ))
         }
       </div>
@@ -33,14 +41,21 @@ const TodoCard = ({todo}: Props) => {
           done ? (
             <div 
               className="text-red-500 hover:text-red-700 ml-4"
-              onClick={() => showModal(<DeleteModal/>)}
+              onClick={() => 
+                showModal(
+                  <DeleteModal 
+                    message="are you really delete it ?"
+                    deleteAction={deleteTodo}
+                  />
+                )
+              }
             >
               delete
             </div>
           ) : (
             <div 
               className="text-green-500 hover:text-green-700"
-              onClick={() => router.push(`todo/${todo.id}`)}
+              onClick={() => router.push(`/todo/${todo.id}`)}
             >
               edit
             </div>
@@ -52,11 +67,3 @@ const TodoCard = ({todo}: Props) => {
 };
 
 export default TodoCard;
-
-const DeleteModal = () => {
-  return (
-    <div className="bg-white p-5">
-      <p>are you really delete it ?</p>
-    </div>
-  )
-}

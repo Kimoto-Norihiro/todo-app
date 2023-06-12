@@ -8,6 +8,11 @@ class Api::V1::TodosController < ApplicationController
     render json: todo, status: :ok
   end
 
+  def show
+    todo = Todo.find(params[:id]).as_json(include: [:tags])
+    render json: todo, status: :ok
+  end
+
   def create
     todo = current_user.todos.new(todo_params)
     if todo.save
@@ -18,7 +23,11 @@ class Api::V1::TodosController < ApplicationController
   end
 
   def destroy 
-    @todo.destroy
+    if @todo.destroy
+      render status: :ok
+    else
+      render json: @todo.errors
+    end
   end
 
   def update
