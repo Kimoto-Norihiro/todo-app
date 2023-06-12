@@ -26,7 +26,10 @@ const SignUp: NextPage = () => {
   })
 
   const signUp = async (user: SignUpFormValues) => {
-    const response = await axios.post('http://localhost:3000/api/v1/users', {user: user}, { withCredentials: true })
+    const response = await axios.post('http://localhost:8000/api/v1/users', 
+      { user: user }, 
+      { withCredentials: true },
+    )
     return response.data
   }
 

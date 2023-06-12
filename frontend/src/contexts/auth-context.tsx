@@ -19,7 +19,6 @@ export const AuthProvider = ({children}: Props) => {
   const login = async (token: string) => {
     localStorage.setItem('token', token)
     setAuthToken(token)
-    console.log('login', token)
   }
   const logout = async () => {
     localStorage.setItem('token', '')

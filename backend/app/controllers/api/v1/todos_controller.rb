@@ -8,6 +8,11 @@ class Api::V1::TodosController < ApplicationController
     render json: todo, status: :ok
   end
 
+  def show
+    todo = Todo.find(params[:id]).as_json(include: [:tags])
+    render json: todo, status: :ok
+  end
+
   def create
     todo = current_user.todos.new(todo_params)
     if todo.save

@@ -29,7 +29,11 @@ const SignIn: NextPage = () => {
 
   const signIn = async (user: signInFormValues) => {
     try {
-      const response = await axios.post('http://localhost:3000/api/v1/sign_in', user, { withCredentials: true })
+      const response = await axios.post(
+        'http://localhost:8000/api/v1/sign_in', 
+        user, 
+        { withCredentials: true },
+      )
       return response.data
     } catch (err) {
       if (err instanceof Error) {

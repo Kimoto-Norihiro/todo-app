@@ -26,13 +26,16 @@ const CreateTodo: NextPage = () => {
   });
 
   const createTodo = async (todo: TodoCreateRequest) => {
-    const response = await axios.post(`http://localhost:3000/api/v1/todos`, { todo: todo }, 
-    { headers: {'Authorization': `Bearer: ${authToken}`} })
+    const response = await axios.post(`http://localhost:8000/api/v1/todos`, { todo: todo }, 
+    {
+      withCredentials: true, 
+      headers: {'Authorization': `Bearer: ${authToken}`} 
+    })
     return response.data
   }
 
   useEffect(() => {
-    console.log('authToken',localStorage.getItem('authToken'))
+    console.log('authToken', localStorage.getItem('authToken'))
   }, [])
 
   const onSubmit = async () => {
@@ -42,6 +45,7 @@ const CreateTodo: NextPage = () => {
         body: data.body,
       })
       console.log(response)
+      router.back()
     }, (err) => {
       console.log(err)
       console.log('error')

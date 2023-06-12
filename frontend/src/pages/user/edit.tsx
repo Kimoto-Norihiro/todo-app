@@ -1,6 +1,5 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import type { NextPage } from 'next'
-import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -9,38 +8,55 @@ import { useRouter } from 'next/router'
 import axios from 'axios'
 import { InputWithError } from '../../components/parts/InputWithError'
 import { HeaderWithBody } from '../../components/layouts/HeaderWithBody';
+import { useAuth } from '@/contexts/auth-context'
 
 const userEditSchema = yup.object().shape({
   name: yup.string().required('required input'),
   email: yup.string().email('invalid email').required('required input'),
 })
 
-export type userEditFormValues = Omit<User, 'id'|'password'>
+export type userEditFormValues = Pick<User, "id" | "email" | "name">
 
 const SignUp: NextPage = () => {
   const [err, setErr] = useState('')
+  const [user, setUser] = useState<userEditFormValues>()
   const router = useRouter()
-  const { register, handleSubmit, formState: { errors } } = useForm<userEditFormValues>({
+  const { authToken } = useAuth()
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<userEditFormValues>({
     resolver: yupResolver(userEditSchema)
   })
 
-  const signUp = async (user: userEditFormValues) => {
-    // const response = await axios.post('http://localhost:8000/signup', user)
-    // return response.data
+  const getUser = async () => {
+    const { data } = await axios.get('http://localhost:8000/api/v1/users', {
+      withCredentials: true,
+      headers: {'Authorization': `Bearer: ${authToken}`},
+    })
+    setUser(data)
+  }
+
+  const updateUser = async (user: userEditFormValues) => {
+    const response = await axios.put('http://localhost:8000/api/v1/users', user, {
+      withCredentials: true,
+      headers: { 'Authorization': `Bearer ${authToken}` },
+    })
   }
 
   const submit = () => {
     handleSubmit(async (data) => {
-      // const { result, message } = await signUp(data)
-      // if (result) {
-      //   router.push('/signin')
-      // } else {
-      //   setErr(message)
-      // }
+      const response = await updateUser(data)
+      await router.back()
     }, () => {
       console.log('error')
     })()
   }
+
+  useEffect(() => {
+    getUser()
+  },[authToken])
+
+  useEffect(() => {
+    if (user) reset(user)
+  }, [user])
 
   return (
     <HeaderWithBody>

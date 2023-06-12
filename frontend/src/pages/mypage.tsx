@@ -15,21 +15,23 @@ const MyPage: NextPage = () => {
   const { authToken } = useAuth()
   const [user, setUser] = useState<User>()
 
-  const getUser = async (authToken: string) => {
-    const { data } = await authAxios.get('http://localhost:3000/api/v1/users', {
+  const getUser = async () => {
+    const { data } = await authAxios.get('http://localhost:8000/api/v1/users', {
+      withCredentials: true,
       headers: {'Authorization': `Bearer: ${authToken}`},
     })
     setUser(data)
   }
 
-  const updateUser = async (user: User) => {
-    await authAxios.put('http://localhost:3000/api/v1/users', user, {
-      headers: {'Authorization': `Bearer: ${authToken}`},
+  const deleteUser = async () => {
+    const response = await authAxios.delete('http://localhost:8000/api/v1/users', {
+      withCredentials: true,
+      headers: { 'Authorization': `Bearer ${authToken}` },
     })
   }
 
   useEffect(() => {
-    if (authToken) getUser(authToken)
+    if (authToken) getUser()
   },[authToken])
 
   return (
@@ -60,8 +62,11 @@ const MyPage: NextPage = () => {
                 onClick={() => 
                   showModal(
                     <DeleteModal 
-                      message='hello' 
-                      deleteAction={() => console.log('hello')}
+                      message='are you really delete your account?' 
+                      deleteAction={() => {
+                        deleteUser()
+                        router.push('/signin')
+                      }}
                     />
                   )
                 }

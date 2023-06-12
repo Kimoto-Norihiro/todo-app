@@ -8,79 +8,71 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup';
 import axios from 'axios'
 import { useAuth } from '@/contexts/auth-context'
+import { useRouter } from 'next/router'
 
-type PathParams = {
+type TodoUpdateRequest = Pick<Todo, 'title' | 'body'>
+
+type Props = {
   id: string
 }
 
-export const getStaticPaths: GetStaticPaths<PathParams> = async () => {
-  const token = localStorage.getItem('token') || ''
-  const { data } = await axios.get('http://localhost:3000/api/v1/todos', {
-    headers: {'Authorization': `Bearer: ${token}`},
-  })
-  const todos = data.todos as Todo[]
-  const paths = todos.map((todo) => ({
-    params: { id: todo.id.toString() },
-  })) || []
-  return {
-    paths,
-    fallback: 'blocking'
-  };
-};
-
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const id = params?.id
-  const token = localStorage.getItem('token') || ''
-  const { data } = await axios.get(`http://localhost:3000/api/v1/todos`, {
-    headers: {'Authorization': `Bearer: ${token}`},
-  })
-  const todos = data.todos as Todo[]
-  const todo = todos.find((todo) => todo.id === Number(id))
-
-  return {
-    props: {
-      initial_todo: todo,
-    },
-  }
-}
-
-type TodoUpdateRequest = Pick<Todo, 'id' | 'title' | 'body'>
-
-type Props = {
-  initial_todo: TodoUpdateRequest
-}
-
 const todoSchema = yup.object().shape({
-  title: yup.string().email('invalid email').required('required input'),
+  title: yup.string().required('required input'),
 })
 
-const EditTodo: NextPage<Props> = ({ initial_todo }) => {
+const EditTodo: NextPage<Props> = ({ id }) => {
   const [err, setErr] = useState('')
+  const router = useRouter()
   const { authToken } = useAuth()
-  const { register, handleSubmit, formState: { errors } } = useForm<TodoUpdateRequest>({
+  const [todo, setTodo] = useState<TodoUpdateRequest>()
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm<TodoUpdateRequest>({
     resolver: yupResolver(todoSchema),
   });
-  const [todo, setTodo] = useState<TodoUpdateRequest>(initial_todo)
+
+  const getTodo = async () => {
+    const {data} = await axios.get(`http://localhost:8000/api/v1/todos/${id}`,
+      {
+        withCredentials: true, 
+        headers: {'Authorization': `Bearer: ${authToken}`},
+      }
+    )
+    setTodo(data)
+  }
 
   const updateTodo = async (todo: TodoUpdateRequest) => {
-    const response = await axios.put(`http://localhost:3000/api/v1/todos/${todo.id}`, { todo: todo }, { 
-      headers: {'Authorization': `Bearer: ${authToken}`},
-    })
+    const response = await axios.put(`http://localhost:8000/api/v1/todos/${id}`, 
+      { todo: todo }, 
+      {
+        withCredentials: true, 
+        headers: {'Authorization': `Bearer: ${authToken}`},
+      }
+    )
   }
 
   const onSubmit = async () => {
     handleSubmit(async (data) => {
       const response = await updateTodo({
-        id: data.id,
         title: data.title,
         body: data.body,
       })
       console.log(response)
+      router.back()
     }, (err) => {
       console.log(err)
       console.log('error')
     })()
   }
+
+  useEffect(() => {
+    getTodo()
+  },[authToken])
+
+  useEffect(() => {
+    if (todo) {
+      setValue('title', todo?.title || '')
+      setValue('body', todo?.body || '')
+    }
+  },[todo])
 
   return (
     <HeaderWithBody>
@@ -118,6 +110,26 @@ const EditTodo: NextPage<Props> = ({ initial_todo }) => {
       </div>
     </HeaderWithBody>	
   )
+}
+
+type PathParams = {
+  id: string
+}
+
+export const getStaticPaths: GetStaticPaths<PathParams> = async () => {
+  return {
+    paths: [],
+    fallback: true,
+  };
+};
+
+export const getStaticProps: GetStaticProps = async ({params}) => {
+  const { id } = params as PathParams
+  return {
+    props: {
+      id,
+    },
+  }
 }
 
 export default EditTodo

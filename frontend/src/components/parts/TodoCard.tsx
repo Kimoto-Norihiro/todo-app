@@ -20,10 +20,6 @@ const TodoCard = ({todo}: Props) => {
     await authAxios.delete(`/todos/${todo.id}`, { headers: {'Authorization': `Bearer: ${authToken}`} })
   }
 
-  useEffect(() => {
-    console.log(authToken)
-  },[])
-
   return (
     <div className="flex rounded-lg p-4 py-2 items-center justify-between border-2 border-gray-500 m-1">
       <div className="flex items-center w-1/2">
